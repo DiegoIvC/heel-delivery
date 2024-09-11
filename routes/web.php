@@ -26,9 +26,7 @@ Route::middleware('auth')->group(function () {
 
     //hamburguesada
         //ordenes
-
-    Route::get('/ordenes/crear', [OrdenController::class, 'create'])->name('ordenes.create');
-
+        Route::get('/ordenes/crear', [OrdenController::class, 'create'])->name('ordenes.create');
     Route::post('/ordenes', [OrdenController::class, 'store'])->name('ordenes.store');
 });
 
