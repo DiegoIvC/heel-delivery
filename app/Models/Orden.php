@@ -14,6 +14,8 @@ class Orden extends Model
         'direccion',
         'estado_entrega',
         'costo_entrega',
+        'telefono',
+        'repartidor',
         'user_id',
     ];
     public function detalles()
@@ -22,6 +24,10 @@ class Orden extends Model
     }
     public function user()
     {
-        return $this->belongsTo(User::class); // Relación con el modelo User
+        return $this->belongsTo(User::class);
+    }
+    public function repartidor()
+    {
+        return $this->belongsTo(User::class, 'repartidor');
     }
 }

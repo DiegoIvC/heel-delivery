@@ -2,10 +2,10 @@
     <Head title="Orden" />
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Crear Orden</h2>
         </template>
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-2xl font-bold mb-6">Crear Nueva Orden</h1>
+
+    <div class="bg-white p-4 rounded-lg shadow-lg max-w-3xl mx-auto mt-5">
 
         <!-- Formulario de Orden -->
         <form @submit.prevent="submitOrden">
@@ -66,6 +66,63 @@
                 <span v-if="errors.direccion" class="text-red-600">{{ errors.direccion }}</span>
             </div>
 
+            <div class="mb-4">
+                <label for="vendedor" class="block font-bold mb-2">Vendedor</label>
+                <div class="relative">
+                    <select
+                        v-model="form.vendedor"
+                        id="vendedor"
+                        class="border border-gray-300 p-2 pl-10 w-full"
+                    >
+                        <option value="">Selecciona un vendedor</option>
+                        <option value="diego">Diego</option>
+                        <option value="regina">Regina</option>
+                        <option value="johan">Johan</option>
+                        <option value="vicky">Vicky</option>
+                        <option value="shadow">Shadow</option>
+                    </select>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="absolute top-1/2 left-3 transform -translate-y-1/2 w-6 h-6 text-gray-500"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                    </svg>
+                </div>
+                <span v-if="errors.vendedor" class="text-red-600">{{ errors.vendedor }}</span>
+            </div>
+
+
+            <div class="mb-4">
+                <label for="telefono" class="block font-bold mb-2">Telefono</label>
+                <div class="relative">
+                    <input
+                        v-model="form.telefono"
+                        type="number"
+                        id="telefono"
+                        class="border border-gray-300 p-2 pl-10 w-full"
+                        placeholder="Escribe el teléfono del cliente"
+                    />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="absolute top-1/2 left-3 transform -translate-y-1/2 w-5 h-5 text-gray-500"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
+                        />
+                    </svg>
+                </div>
+                <span v-if="errors.telefono" class="text-red-600">{{ errors.telefono }}</span>
+            </div>
             <div class="mb-4">
                 <label for="costo_entrega" class="block font-bold mb-2">Costo de Entrega</label>
                 <div class="relative">
@@ -145,19 +202,20 @@ import { Inertia } from '@inertiajs/inertia';
 const form = reactive({
     cliente: '',
     direccion: '',
+    telefono: 0,
     estado_entrega: false,
     costo_entrega: 0,
+    vendedor:'',
     detalles: []
 });
 
 const hamburguesa = reactive({
     nombre_hamburguesa: '',
     cantidad: 1,
-    precio_unitario: 0,
+    precio_unitario: 85,
 });
 
 const errors = reactive({});
-const successMessage = "Orden creada con éxito";
 const showHamburguesaModal = ref(false);
 
 const openHamburguesaModal = () => showHamburguesaModal.value = true;
@@ -165,25 +223,31 @@ const closeHamburguesaModal = () => showHamburguesaModal.value = false;
 
 const addHamburguesa = () => {
     form.detalles.push({...hamburguesa});
+    hamburguesa.nombre_hamburguesa = '';
+    hamburguesa.cantidad = 1;
+    hamburguesa.precio_unitario = 85;
     closeHamburguesaModal();
 };
 
 const submitOrden = () => {
-    console.log(form);  // Verifica los datos
+    console.log('Datos del formulario:', form); // Verifica si 'vendedor' está incluido
     Inertia.post('/ordenes', form, {
         onError: (error) => {
             Object.assign(errors, error.response.data.errors);
         },
         onSuccess: () => {
-            successMessage.value = 'Orden creada con éxito';
             form.cliente = '';
             form.direccion = '';
+            form.telefono = 0;
             form.costo_entrega = 0;
             form.detalles = [];
+            form.vendedor = ''; // Restablece el valor del vendedor
         }
     });
 };
+
 </script>
+
 
 <style scoped>
 /* Aquí puedes agregar estilos personalizados */

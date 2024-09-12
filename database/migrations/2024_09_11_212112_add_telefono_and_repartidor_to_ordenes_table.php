@@ -11,17 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ordenes', function (Blueprint $table) {
-            $table->id();
-            $table->string('cliente');
-            $table->string('direccion');
-            $table->boolean('estado_entrega')->default(false);
-            $table->decimal('costo_entrega', 10, 2);
-            $table->foreignId('user_id')->constrained('users');
+        Schema::table('ordenes', function (Blueprint $table) {
             $table->string('telefono')->nullable(); // Columna teléfono
-            $table->string('vendedor')->nullable(); // Columna teléfono
             $table->foreignId('repartidor')->nullable()->constrained('users')->onDelete('set null'); // Llave foránea a users
-            $table->timestamps();
         });
     }
 
@@ -30,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ordenes');
+        Schema::table('ordenes', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -26,8 +26,10 @@ Route::middleware('auth')->group(function () {
 
     //hamburguesada
         //ordenes
+        Route::get('/ordenes/index', [OrdenController::class, 'index'])->name('ordenes.index');
         Route::get('/ordenes/crear', [OrdenController::class, 'create'])->name('ordenes.create');
-    Route::post('/ordenes', [OrdenController::class, 'store'])->name('ordenes.store');
+        Route::post('/ordenes', [OrdenController::class, 'store'])->name('ordenes.store');
+        Route::get('/ordenes/{id}', [OrdenController::class, 'show'])->name('ordenes.show');
 });
 
 require __DIR__.'/auth.php';
