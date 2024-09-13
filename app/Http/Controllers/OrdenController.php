@@ -113,15 +113,128 @@ class OrdenController extends Controller
     }
 
 
-    public function show($id)
-    {
-        $orden = Orden::with('detalles', 'repartidor')->findOrFail($id);
 
-        return Inertia::render('Show', [
+        public function show($id)
+    {// Obtener la orden y sus detalles
+        $orden = DB::table('ordenes')
+            ->leftJoin('users as repartidores', 'ordenes.repartidor', '=', 'repartidores.id')
+            ->leftJoin('detalles_orden', 'ordenes.id', '=', 'detalles_orden.orden_id')
+            ->where('ordenes.id', $id)
+            ->select(
+                'ordenes.id',
+                'ordenes.cliente',
+                'ordenes.direccion',
+                'ordenes.telefono',
+                'ordenes.costo_entrega',
+                'ordenes.estado_entrega',
+                DB::raw('SUM(detalles_orden.precio_total) as monto_total'),
+                'repartidores.name as repartidor_nombre'
+            )
+            ->groupBy(
+                'ordenes.id',
+                'ordenes.cliente',
+                'ordenes.direccion',
+                'ordenes.telefono',
+                'ordenes.costo_entrega',
+                'ordenes.estado_entrega',
+                'repartidores.name'
+            )
+            ->first();
+
+// Obtener los detalles de la orden
+            $detalles = DB::table('detalles_orden')
+                ->where('orden_id', $id)
+                ->get();
+
+// Verificar si se encontró la orden
+            if (!$orden) {
+                abort(404, 'Orden no encontrada');
+            }
+
+// Retornar la orden y detalles a la vista
+            return Inertia::render('Show', [
+                'orden' => $orden, // Datos de la orden
+                'detalles' => $detalles, // Datos de los detalles
+            ]);
+
+
+        }
+
+    public function edit($id)
+    {
+        $orden = DB::table('ordenes')
+            ->where('id', $id)
+            ->first();
+
+        // Obtener los detalles de la orden
+        $detalles = DB::table('detalles_orden')
+            ->where('orden_id', $id)
+            ->get();
+
+        // Pasar los datos a la vista de edición
+        return inertia('Orden/Edit', [
             'orden' => $orden,
-            'detalles' => $orden->detalles,
-            'repartidor' => $orden->repartidor ? $orden->repartidor->name : 'Sin repartidor',
+            'detalles' => $detalles,
         ]);
     }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            // Valida los datos
+            $validatedData = $request->validate([
+                'cliente' => 'required|string|max:255',
+                'direccion' => 'required|string|max:255',
+                'telefono' => 'nullable',
+                'costo_entrega' => 'required|numeric|min:0',
+                'vendedor' => 'nullable|string',
+                'detalles' => 'required|array',
+                'detalles.*.nombre_hamburguesa' => 'required|string|max:255',
+                'detalles.*.cantidad' => 'required|integer|min:1',
+                'detalles.*.precio_unitario' => 'required|numeric|min:0',
+            ]);
+
+            // Encuentra la orden a actualizar
+            $orden = Orden::findOrFail($id);
+
+            // Actualiza la orden
+            $orden->update([
+                'cliente' => $validatedData['cliente'],
+                'direccion' => $validatedData['direccion'],
+                'telefono' => $validatedData['telefono'],
+                'vendedor'=> $validatedData['vendedor'],
+                'costo_entrega' => $validatedData['costo_entrega'],
+            ]);
+
+            // Elimina los detalles actuales
+            $orden->detalles()->delete();
+
+            // Guarda los nuevos detalles de la orden
+            foreach ($validatedData['detalles'] as $detalle) {
+                DetalleOrden::create([
+                    'orden_id' => $orden->id,
+                    'nombre_hamburguesa' => $detalle['nombre_hamburguesa'],
+                    'cantidad' => $detalle['cantidad'],
+                    'precio_unitario' => $detalle['precio_unitario'],
+                    'precio_total' => $detalle['cantidad'] * $detalle['precio_unitario'],
+                ]);
+            }
+
+            // Retorna mensaje de éxito
+            return response()->json([
+                'success' => true,
+                'message' => 'Orden actualizada con éxito',
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Retorna mensaje de error
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al actualizar la orden',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
 }

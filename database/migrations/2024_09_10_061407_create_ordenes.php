@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->string('telefono')->nullable(); // Columna teléfono
             $table->string('vendedor')->nullable(); // Columna teléfono
+            $table->string('zona')->nullable();
             $table->foreignId('repartidor')->nullable()->constrained('users')->onDelete('set null'); // Llave foránea a users
             $table->timestamps();
         });

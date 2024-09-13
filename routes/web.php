@@ -30,6 +30,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/ordenes/crear', [OrdenController::class, 'create'])->name('ordenes.create');
         Route::post('/ordenes', [OrdenController::class, 'store'])->name('ordenes.store');
         Route::get('/ordenes/{id}', [OrdenController::class, 'show'])->name('ordenes.show');
+        Route::get('/ordenes/{id}/editar', [OrdenController::class, 'edit'])->name('ordenes.edit');
+        Route::put('/ordenes/{id}', [OrdenController::class, 'update']);
+            //detalles
+            Route::post('/detalles_orden', [\App\Http\Controllers\DetalleOrdenController::class, 'store'])->name('detalles_orden.store');
 });
 
 require __DIR__.'/auth.php';
