@@ -6,10 +6,35 @@
         </template>
 
         <div class="bg-white p-4 rounded-lg shadow-lg max-w-3xl mx-auto mt-5">
-            <h1 class="text-2xl font-bold mb-4">Detalles de la Orden</h1>
-            <p><strong>Cliente:</strong> {{ orden.cliente }}</p>
-            <p><strong>Dirección:</strong> {{ orden.direccion }}</p>
-            <p><strong>Costo de entrega:</strong> {{ costoEntregaFixed }}</p>
+            <div class="p-6 bg-white shadow-md rounded-lg">
+                <h1 class="text-3xl font-extrabold text-gray-900 mb-6">Detalles de la Orden</h1>
+
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <span class="text-lg font-semibold text-gray-700 mr-2">Cliente:</span>
+                        <p class="text-gray-800">{{ orden.cliente }}</p>
+                    </div>
+
+                    <div class="flex items-center">
+                        <span class="text-lg font-semibold text-gray-700 mr-2">Dirección:</span>
+                        <p class="text-gray-800">{{ orden.direccion }}</p>
+                    </div>
+
+                    <div class="flex items-center">
+                        <span class="text-lg font-semibold text-gray-700 mr-2">Costo de entrega:</span>
+                        <p class="text-gray-800">{{ costoEntregaFixed }}</p>
+                    </div>
+
+                    <div class="flex items-center">
+                        <span class="text-lg font-semibold text-gray-700 mr-2">Repartidor:</span>
+                        <p class="text-gray-800">{{ orden.repartidor_nombre || 'Sin repartidor asignado' }}</p>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-lg font-semibold text-gray-700 mr-2">Zona:</span>
+                        <p class="text-gray-800">{{ orden.zona }}</p>
+                    </div>
+                </div>
+            </div>
 
             <!-- Tabla de detalles de la orden -->
             <table class="min-w-full bg-white border border-gray-200 rounded-lg mt-4">

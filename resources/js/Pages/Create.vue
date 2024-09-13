@@ -123,6 +123,7 @@
                 </div>
                 <span v-if="errors.telefono" class="text-red-600">{{ errors.telefono }}</span>
             </div>
+
             <div class="mb-4">
                 <label for="costo_entrega" class="block font-bold mb-2">Costo de Entrega</label>
                 <div class="relative">

@@ -128,7 +128,8 @@ class OrdenController extends Controller
                 'ordenes.costo_entrega',
                 'ordenes.estado_entrega',
                 DB::raw('SUM(detalles_orden.precio_total) as monto_total'),
-                'repartidores.name as repartidor_nombre'
+                'repartidores.name as repartidor_nombre',
+                'ordenes.zona'
             )
             ->groupBy(
                 'ordenes.id',
@@ -137,7 +138,8 @@ class OrdenController extends Controller
                 'ordenes.telefono',
                 'ordenes.costo_entrega',
                 'ordenes.estado_entrega',
-                'repartidores.name'
+                'repartidores.name',
+                'ordenes.zona'
             )
             ->first();
 
@@ -162,20 +164,51 @@ class OrdenController extends Controller
 
     public function edit($id)
     {
-        $orden = DB::table('ordenes')
-            ->where('id', $id)
-            ->first();
+        {// Obtener la orden y sus detalles
+            $orden = DB::table('ordenes')
+                ->leftJoin('users as repartidores', 'ordenes.repartidor', '=', 'repartidores.id')
+                ->leftJoin('detalles_orden', 'ordenes.id', '=', 'detalles_orden.orden_id')
+                ->where('ordenes.id', $id)
+                ->select(
+                    'ordenes.id',
+                    'ordenes.cliente',
+                    'ordenes.direccion',
+                    'ordenes.telefono',
+                    'ordenes.costo_entrega',
+                    'ordenes.estado_entrega',
+                    DB::raw('SUM(detalles_orden.precio_total) + ordenes.costo_entrega as monto_total'),
+                    'repartidores.name as repartidor_nombre',
+                    'ordenes.zona'
+                )
+                ->groupBy(
+                    'ordenes.id',
+                    'ordenes.cliente',
+                    'ordenes.direccion',
+                    'ordenes.telefono',
+                    'ordenes.costo_entrega',
+                    'ordenes.estado_entrega',
+                    'repartidores.name',
+                    'ordenes.zona'
+                )
+                ->orderBy('ordenes.zona', 'DESC')
+                ->first();
 
-        // Obtener los detalles de la orden
-        $detalles = DB::table('detalles_orden')
-            ->where('orden_id', $id)
-            ->get();
+// Obtener los detalles de la orden
+            $detalles = DB::table('detalles_orden')
+                ->where('orden_id', $id)
+                ->get();
 
-        // Pasar los datos a la vista de edición
-        return inertia('Orden/Edit', [
-            'orden' => $orden,
-            'detalles' => $detalles,
-        ]);
+// Verificar si se encontró la orden
+            if (!$orden) {
+                abort(404, 'Orden no encontrada');
+            }
+
+// Retornar la orden y detalles a la vista
+            return Inertia::render('Orden/Edit', [
+                'orden' => $orden, // Datos de la orden
+                'detalles' => $detalles, // Datos de los detalles
+            ]);
+    }
     }
 
     public function update(Request $request, $id)

@@ -15,6 +15,7 @@
                     <th class="px-4 py-2">Monto Total</th>
                     <th class="px-4 py-2">Estado</th>
                     <th class="px-4 py-2">Repartidor</th>
+                    <th class="px-4 py-2">Zona</th>
                     <th class="px-4 py-2">Acciones</th>
                 </tr>
                 </thead>
@@ -26,6 +27,7 @@
                     <td class=" px-4 py-2">{{ orden.monto_total.toFixed(2) }} MXN</td>
                     <td class=" px-4 py-2">{{ orden.estado_entrega }}</td>
                     <td class=" px-4 py-2">{{ orden.repartidor }}</td>
+                    <td class=" px-4 py-2">{{ orden.zona }}</td>
                     <td class=" px-4 py-2">
                         <button @click="verDetalle(orden.id)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                             Ver
