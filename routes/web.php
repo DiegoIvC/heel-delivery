@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/ordenes/{id}', [OrdenController::class, 'show'])->name('ordenes.show');
         Route::get('/ordenes/{id}/editar', [OrdenController::class, 'edit'])->name('ordenes.edit');
         Route::put('/ordenes/{id}', [OrdenController::class, 'update']);
+        Route::put('/ordenes/editar/zona/{id}', [OrdenController::class, 'updateZona'])->name('ordenes.updateZona');
             //detalles
             Route::post('/detalles_orden', [\App\Http\Controllers\DetalleOrdenController::class, 'store'])->name('detalles_orden.store');
 });

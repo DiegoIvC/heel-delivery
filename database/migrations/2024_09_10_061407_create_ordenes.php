@@ -15,12 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('cliente');
             $table->string('direccion');
-            $table->boolean('estado_entrega')->default(false);
+            $table->integer('estado_entrega')->default(0);
+            $table->integer('estado')->default(0);
             $table->decimal('costo_entrega', 10, 2);
             $table->foreignId('user_id')->constrained('users');
             $table->string('telefono')->nullable(); // Columna teléfono
             $table->string('vendedor')->nullable(); // Columna teléfono
-            $table->string('zona')->nullable();
+            $table->string('zona')->default('VERDE');
             $table->foreignId('repartidor')->nullable()->constrained('users')->onDelete('set null'); // Llave foránea a users
             $table->timestamps();
         });

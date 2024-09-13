@@ -268,6 +268,13 @@ class OrdenController extends Controller
             ], 500);
         }
     }
+    public function updateZona(Request $request, $id)
+    {
+        $orden = Orden::findOrFail($id);
+        $orden->zona = $request->input('zona');
+        $orden->save();
 
+        return redirect()->back()->with('success', 'Zona actualizada con éxito');
+    }
 
 }
