@@ -17,16 +17,17 @@ class OrdenController extends Controller
             ->select('orden_id', DB::raw('SUM(precio_total) as monto_total'))
             ->groupBy('orden_id');
 
-// Obtener todas las órdenes junto con sus detalles y el nombre del repartidor
+        // Obtener todas las órdenes junto con sus detalles, el nombre del repartidor y la zona
         $ordenes = DB::table('ordenes')
             ->leftJoinSub($subconsulta, 'detalles_totales', function ($join) {
                 $join->on('ordenes.id', '=', 'detalles_totales.orden_id');
             })
             ->leftJoin('users as repartidores', 'ordenes.repartidor', '=', 'repartidores.id')
+            ->where('ordenes.estado', '=', 0) // Filtro para estado 0
             ->select('ordenes.*', 'repartidores.name as repartidor_nombre', 'detalles_totales.monto_total')
             ->get();
 
-// Transformar los datos para enviar a Vue
+        // Transformar los datos para enviar a Vue
         $ordenesData = $ordenes->map(function ($orden) {
             return [
                 'id' => $orden->id,
@@ -37,6 +38,7 @@ class OrdenController extends Controller
                 'monto_total' => $orden->monto_total + $orden->costo_entrega,
                 'estado_entrega' => $orden->estado_entrega ? 'Entregado' : 'No entregado',
                 'repartidor' => $orden->repartidor_nombre ?? 'Sin repartidor',
+                'zona' => $orden->zona // Asegúrate de que esta línea esté incluida
             ];
         });
 
@@ -276,5 +278,28 @@ class OrdenController extends Controller
 
         return redirect()->back()->with('success', 'Zona actualizada con éxito');
     }
+    public function terminar($id)
+    {
+        // Encontrar la orden por ID
+        $orden = DB::table('ordenes')->where('id', $id)->first();
 
+        if ($orden) {
+            // Actualizar el estado de la orden a 1
+            DB::table('ordenes')->where('id', $id)->update(['estado' => 1]);
+
+            return redirect()->route('ordenes.index');
+        }
+
+        return response()->json(['message' => 'Orden no encontrada.'], 404);
+    }
+
+    public function realizados(){
+        return response('SI JALA');
+    }
+    public function enviosRealizados(){
+        return response('SI JALA');
+    }
+    public function enviosPendientes(){
+        return response('SI JALA');
+    }
 }

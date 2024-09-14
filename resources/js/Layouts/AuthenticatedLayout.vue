@@ -8,6 +8,19 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+const dropdowns = ref({
+    pedidos: false,
+    envios: false
+});
+
+const toggleDropdown = (dropdown) => {
+    // Toggle the clicked dropdown
+    dropdowns.value[dropdown] = !dropdowns.value[dropdown];
+    // Close the other dropdown
+    Object.keys(dropdowns.value).forEach(key => {
+        if (key !== dropdown) dropdowns.value[key] = false;
+    });
+};
 </script>
 
 <template>
@@ -34,13 +47,28 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
                             </div>
                             <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink :href="route('ordenes.create')" :active="route().current('dashboard')">
+                                <NavLink :href="route('ordenes.create')" :active="route().current('ordenes.create')">
                                     Crear orden
                                 </NavLink>
                             </div>
                             <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink :href="route('ordenes.index')" :active="route().current('dashboard')">
-                                    Ver ordenes
+                                <NavLink :href="route('ordenes.index')" :active="route().current('ordenes.index')">
+                                    Ver pedidos pendientes
+                                </NavLink>
+                            </div>
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink :href="route('ordenes.realizados')" :active="route().current('ordenes.realizados')">
+                                    Ver pedidos realizados
+                                </NavLink>
+                            </div>
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink :href="route('ordenes.enviosPendientes')" :active="route().current('ordenes.enviosPendientes')">
+                                    Ver envios pendientes
+                                </NavLink>
+                            </div>
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink :href="route('ordenes.enviosRealizados')" :active="route().current('ordenes.enviosRealizados')">
+                                    Ver envios realizados
                                 </NavLink>
                             </div>
                         </div>
@@ -125,6 +153,51 @@ const showingNavigationDropdown = ref(false);
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
                         </ResponsiveNavLink>
+                    </div>
+                    <div class="pt-2 pb-3 space-y-1">
+                        <ResponsiveNavLink :href="route('ordenes.create')" :active="route().current('ordenes.create')">
+                            Crear orden
+                        </ResponsiveNavLink>
+                    </div>
+
+                    <!-- Dropdown para Pedidos -->
+                    <div class="relative">
+                        <button @click="toggleDropdown('pedidos')" class="block w-full text-left px-4 py-2  text-gray-800 rounded-lg  focus:outline-none focus:ring-2 focus:ring-gray-200">
+                            Pedidos
+                            <svg class="w-5 h-5 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div v-show="dropdowns.pedidos" class="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                            <div class="py-2">
+                                <ResponsiveNavLink :href="route('ordenes.index')" :active="route().current('ordenes.index')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    Ver pedidos pendientes
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('ordenes.realizados')" :active="route().current('ordenes.realizados')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    Ver pedidos realizados
+                                </ResponsiveNavLink>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dropdown para Envíos -->
+                    <div class="relative mt-2">
+                        <button @click="toggleDropdown('envios')" class="block w-full text-left px-4 py-2  text-gray-800 rounded-lg  focus:outline-none focus:ring-2 focus:ring-gray-200">
+                            Envíos
+                            <svg class="w-5 h-5 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div v-show="dropdowns.envios" class="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                            <div class="py-2">
+                                <ResponsiveNavLink :href="route('ordenes.enviosRealizados')" :active="route().current('ordenes.enviosRealizados')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    Ver envíos realizados
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('ordenes.enviosPendientes')" :active="route().current('ordenes.enviosPendientes')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    Ver envíos pendientes
+                                </ResponsiveNavLink>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Responsive Settings Options -->

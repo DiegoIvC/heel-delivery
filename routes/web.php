@@ -30,9 +30,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/ordenes/crear', [OrdenController::class, 'create'])->name('ordenes.create');
         Route::post('/ordenes', [OrdenController::class, 'store'])->name('ordenes.store');
         Route::get('/ordenes/{id}', [OrdenController::class, 'show'])->name('ordenes.show');
-        Route::get('/ordenes/{id}/editar', [OrdenController::class, 'edit'])->name('ordenes.edit');
+        Route::get('/ordenes/{id}/terminar', [OrdenController::class, 'terminar'])->name('ordenes.finish');
         Route::put('/ordenes/{id}', [OrdenController::class, 'update']);
         Route::put('/ordenes/editar/zona/{id}', [OrdenController::class, 'updateZona'])->name('ordenes.updateZona');
+        Route::get('/ordenes/{id}/editar', [OrdenController::class, 'edit'])->name('ordenes.edit');
+        Route::get('/ordenes/pedidos/realizados', [OrdenController::class, 'realizados'])->name('ordenes.realizados');
+        Route::get('/ordenes/envios/realizados', [OrdenController::class, 'enviosRealizados'])->name('ordenes.enviosRealizados');
+        Route::get('/ordenes/envios/pendientes', [OrdenController::class, 'enviosPendientes'])->name('ordenes.enviosPendientes');
+
             //detalles
             Route::post('/detalles_orden', [\App\Http\Controllers\DetalleOrdenController::class, 'store'])->name('detalles_orden.store');
 });
