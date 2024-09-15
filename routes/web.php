@@ -30,6 +30,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/ordenes/crear', [OrdenController::class, 'create'])->name('ordenes.create');
         Route::post('/ordenes', [OrdenController::class, 'store'])->name('ordenes.store');
         Route::get('/ordenes/{id}', [OrdenController::class, 'show'])->name('ordenes.show');
+        Route::get('/ordenes/detalle/realizados/{id}', [OrdenController::class, 'showRealizado'])->name('ordenes.showRealizado');
         Route::get('/ordenes/{id}/terminar', [OrdenController::class, 'terminar'])->name('ordenes.finish');
         Route::put('/ordenes/{id}', [OrdenController::class, 'update']);
         Route::put('/ordenes/editar/zona/{id}', [OrdenController::class, 'updateZona'])->name('ordenes.updateZona');
@@ -37,7 +38,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/ordenes/pedidos/realizados', [OrdenController::class, 'realizados'])->name('ordenes.realizados');
         Route::get('/ordenes/envios/realizados', [OrdenController::class, 'enviosRealizados'])->name('ordenes.enviosRealizados');
         Route::get('/ordenes/envios/pendientes', [OrdenController::class, 'enviosPendientes'])->name('ordenes.enviosPendientes');
-
+        Route::put('/ordenes/editar/repartidor/{id}', [OrdenController::class, 'editarRepartidor'])->name('ordenes.editarRepartidor');
+        Route::put('/ordenes/entregar/{orden}', [OrdenController::class, 'entregar']);
+        Route::put('/ordenes/no/entregar/{orden}', [OrdenController::class, 'noEntregar']);
+        Route::get('/ordenes/envios/pendientes/show/{id}', [OrdenController::class, 'showPendiente'])->name('ordenes.showPendiente');
+        Route::get('/ordenes/envios/realizados/show/{id}', [OrdenController::class, 'showPendiente'])->name('ordenes.showRealizados');
             //detalles
             Route::post('/detalles_orden', [\App\Http\Controllers\DetalleOrdenController::class, 'store'])->name('detalles_orden.store');
 });

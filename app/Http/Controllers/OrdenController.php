@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetalleOrden;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Orden;
@@ -160,8 +161,6 @@ class OrdenController extends Controller
                 'orden' => $orden, // Datos de la orden
                 'detalles' => $detalles, // Datos de los detalles
             ]);
-
-
         }
 
     public function edit($id)
@@ -287,19 +286,251 @@ class OrdenController extends Controller
             // Actualizar el estado de la orden a 1
             DB::table('ordenes')->where('id', $id)->update(['estado' => 1]);
 
-            return redirect()->route('ordenes.index');
+            return redirect()->route('ordenes.realizados');
         }
 
         return response()->json(['message' => 'Orden no encontrada.'], 404);
     }
 
-    public function realizados(){
-        return response('SI JALA');
+    public function realizados()
+    {
+        // Obtener el monto total de los detalles de cada orden
+        $subconsulta = DB::table('detalles_orden')
+            ->select('orden_id', DB::raw('SUM(precio_total) as monto_total'))
+            ->groupBy('orden_id');
+
+        // Obtener todas las órdenes junto con sus detalles, el nombre del repartidor y la zona
+        $ordenes = DB::table('ordenes')
+            ->leftJoinSub($subconsulta, 'detalles_totales', function ($join) {
+                $join->on('ordenes.id', '=', 'detalles_totales.orden_id');
+            })
+            ->leftJoin('users as repartidores', 'ordenes.repartidor', '=', 'repartidores.id')
+            ->where('ordenes.estado', '=', 1) // Filtro para estado 0
+            ->select('ordenes.*', 'repartidores.name as repartidor_nombre', 'detalles_totales.monto_total')
+            ->get();
+
+        // Transformar los datos para enviar a Vue
+        $ordenesData = $ordenes->map(function ($orden) {
+            return [
+                'id' => $orden->id,
+                'cliente' => $orden->cliente,
+                'direccion' => $orden->direccion,
+                'telefono' => $orden->telefono,
+                'costo_entrega' => $orden->costo_entrega,
+                'monto_total' => $orden->monto_total + $orden->costo_entrega,
+                'estado_entrega' => $orden->estado_entrega ? 'Entregado' : 'No entregado',
+                'repartidor' => $orden->repartidor_nombre ?? 'Sin repartidor',
+                'zona' => $orden->zona // Asegúrate de que esta línea esté incluida
+            ];
+        });
+
+        return Inertia::render('Orden/Realizados', [
+            'ordenes' => $ordenesData
+        ]);
+    }
+    public function showRealizado($id)
+    {
+        $orden = DB::table('ordenes')
+            ->leftJoin('users as repartidores', 'ordenes.repartidor', '=', 'repartidores.id')
+            ->leftJoin('detalles_orden', 'ordenes.id', '=', 'detalles_orden.orden_id')
+            ->where('ordenes.id', $id)
+            ->select(
+                'ordenes.id',
+                'ordenes.cliente',
+                'ordenes.direccion',
+                'ordenes.telefono',
+                'ordenes.costo_entrega',
+                'ordenes.estado_entrega',
+                DB::raw('SUM(detalles_orden.precio_total) as monto_total'),
+                'repartidores.name as repartidor_nombre',
+                'ordenes.zona'
+            )
+            ->groupBy(
+                'ordenes.id',
+                'ordenes.cliente',
+                'ordenes.direccion',
+                'ordenes.telefono',
+                'ordenes.costo_entrega',
+                'ordenes.estado_entrega',
+                'repartidores.name',
+                'ordenes.zona'
+            )
+            ->first();
+
+// Obtener los detalles de la orden
+        $detalles = DB::table('detalles_orden')
+            ->where('orden_id', $id)
+            ->get();
+
+// Verificar si se encontró la orden
+        if (!$orden) {
+            abort(404, 'Orden no encontrada');
+        }
+
+// Retornar la orden y detalles a la vista
+        return Inertia::render('Orden/ShowRealizados', [
+            'orden' => $orden, // Datos de la orden
+            'detalles' => $detalles, // Datos de los detalles
+        ]);
     }
     public function enviosRealizados(){
-        return response('SI JALA');
+        // Obtener el monto total de los detalles de cada orden
+        $subconsulta = DB::table('detalles_orden')
+            ->select('orden_id', DB::raw('SUM(precio_total) as monto_total'))
+            ->groupBy('orden_id');
+
+        // Obtener todas las órdenes junto con sus detalles, el nombre del repartidor y la zona
+        $ordenes = DB::table('ordenes')
+            ->leftJoinSub($subconsulta, 'detalles_totales', function ($join) {
+                $join->on('ordenes.id', '=', 'detalles_totales.orden_id');
+            })
+            ->leftJoin('users as repartidores', 'ordenes.repartidor', '=', 'repartidores.id')
+            ->where('ordenes.estado_entrega', '=', 1)
+            ->where('ordenes.estado', '=',1)
+            ->select('ordenes.*', 'repartidores.name as repartidor_nombre', 'detalles_totales.monto_total')
+            ->get();
+
+        // Transformar los datos para enviar a Vue
+        $ordenesData = $ordenes->map(function ($orden) {
+            return [
+                'id' => $orden->id,
+                'cliente' => $orden->cliente,
+                'direccion' => $orden->direccion,
+                'telefono' => $orden->telefono,
+                'costo_entrega' => $orden->costo_entrega,
+                'monto_total' => $orden->monto_total + $orden->costo_entrega,
+                'estado_entrega' => $orden->estado_entrega ? 'Entregado' : 'No entregado',
+                'repartidor' => $orden->repartidor_nombre ?? 'Sin repartidor',
+                'zona' => $orden->zona // Asegúrate de que esta línea esté incluida
+            ];
+        });
+
+        //OBTENER USUARIOS
+        $usuarios = User::all();
+        return Inertia::render('Orden/EnviosRealizados', [
+            'ordenes' => $ordenesData,
+            'usuarios' => $usuarios
+        ]);
     }
     public function enviosPendientes(){
-        return response('SI JALA');
+        // Obtener el monto total de los detalles de cada orden
+        $subconsulta = DB::table('detalles_orden')
+            ->select('orden_id', DB::raw('SUM(precio_total) as monto_total'))
+            ->groupBy('orden_id');
+
+        // Obtener todas las órdenes junto con sus detalles, el nombre del repartidor y la zona
+        $ordenes = DB::table('ordenes')
+            ->leftJoinSub($subconsulta, 'detalles_totales', function ($join) {
+                $join->on('ordenes.id', '=', 'detalles_totales.orden_id');
+            })
+            ->leftJoin('users as repartidores', 'ordenes.repartidor', '=', 'repartidores.id')
+            ->where('ordenes.estado_entrega', '=', 0)
+            ->where('ordenes.estado', '=',1)
+            ->select('ordenes.*', 'repartidores.name as repartidor_nombre', 'detalles_totales.monto_total')
+            ->get();
+
+        // Transformar los datos para enviar a Vue
+        $ordenesData = $ordenes->map(function ($orden) {
+            return [
+                'id' => $orden->id,
+                'cliente' => $orden->cliente,
+                'direccion' => $orden->direccion,
+                'telefono' => $orden->telefono,
+                'costo_entrega' => $orden->costo_entrega,
+                'monto_total' => $orden->monto_total + $orden->costo_entrega,
+                'estado_entrega' => $orden->estado_entrega ? 'Entregado' : 'No entregado',
+                'repartidor' => $orden->repartidor_nombre ?? 'Sin repartidor',
+                'zona' => $orden->zona // Asegúrate de que esta línea esté incluida
+            ];
+        });
+
+        //OBTENER USUARIOS
+        $usuarios = User::all();
+        return Inertia::render('Orden/EnviosPendientes', [
+            'ordenes' => $ordenesData,
+            'usuarios' => $usuarios
+        ]);
+    }
+
+    public function editarRepartidor($ordenId, Request $request)
+    {
+        $orden = Orden::find($ordenId);
+        if (!$orden) {
+            return Inertia::render('ErrorPage', [
+                'message' => 'Orden no encontrada'
+            ]);
+        }
+
+        $orden->repartidor = $request->input('repartidor_id');
+        $orden->save();
+
+        return redirect()->route('ordenes.enviosPendientes');
+    }
+    public function entregar($ordenId)
+    {
+        $orden = Orden::findOrFail($ordenId);
+        if ($orden) {
+            // Actualizar el estado de la orden a 1
+            DB::table('ordenes')->where('id', $ordenId)->update(['estado_entrega' => 1]);
+
+            return redirect()->route('ordenes.enviosPendientes');
+        }
+
+        return response()->json(['message' => 'Orden no encontrada.'], 404);
+
+    }
+    public function noEntregar($ordenId)
+    {
+        $orden = Orden::findOrFail($ordenId);
+        if ($orden) {
+            // Actualizar el estado de la orden a 1
+            DB::table('ordenes')->where('id', $ordenId)->update(['estado_entrega' => 0]);
+
+            return redirect()->route('ordenes.enviosRealizados');
+        }
+
+        return response()->json(['message' => 'Orden no encontrada.'], 404);
+
+    }
+    public function showPendiente($id){
+        $orden = DB::table('ordenes')
+            ->leftJoin('users as repartidores', 'ordenes.repartidor', '=', 'repartidores.id')
+            ->leftJoin('detalles_orden', 'ordenes.id', '=', 'detalles_orden.orden_id')
+            ->where('ordenes.id', $id)
+            ->select(
+                'ordenes.id',
+                'ordenes.cliente',
+                'ordenes.direccion',
+                'ordenes.telefono',
+                'ordenes.costo_entrega',
+                'ordenes.estado_entrega',
+                DB::raw('SUM(detalles_orden.precio_total) as monto_total'),
+                'repartidores.name as repartidor_nombre',
+                'ordenes.zona'
+            )
+            ->groupBy(
+                'ordenes.id',
+                'ordenes.cliente',
+                'ordenes.direccion',
+                'ordenes.telefono',
+                'ordenes.costo_entrega',
+                'ordenes.estado_entrega',
+                'repartidores.name',
+                'ordenes.zona'
+            )
+            ->first();
+
+        $detalles = DB::table('detalles_orden')
+            ->where('orden_id', $id)
+            ->get();
+
+        if (!$orden) {
+            abort(404, 'Orden no encontrada');
+        }
+
+        return Inertia::render('Orden/ShowEnvioPendiente', [
+            'orden' => $orden,
+            'detalles' => $detalles,
+        ]);
     }
 }
