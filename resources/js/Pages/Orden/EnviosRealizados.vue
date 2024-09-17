@@ -2,7 +2,7 @@
     <Head title="Ordenes" />
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Envios pendientes</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Envios realizados</h2>
         </template>
         <div class="bg-white p-4 rounded-lg shadow-lg max-w-7xl mx-auto mt-5">
             <!-- Hacemos la tabla responsive -->

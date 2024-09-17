@@ -6,54 +6,59 @@
         </template>
 
         <div class="bg-white p-4 rounded-lg shadow-lg max-w-7xl mx-auto mt-5">
-            <table class="table-auto mb-4 w-full whitespace-no-wrap">
-                <thead>
-                <tr class="text-xs font-semibold tracking-wide text-left text-white uppercase border-b dark:border-gray-700 bg-gray-600">
-                    <th class="px-4 py-2">Cliente</th>
-                    <th class="px-4 py-2">Dirección</th>
-                    <th class="px-4 py-2">Teléfono</th>
-                    <th class="px-4 py-2">Monto Total</th>
-                    <th class="px-4 py-2">Repartidor</th>
-                    <th class="px-4 py-2">Zona</th>
-                    <th class="px-4 py-2">Ver</th>
-                    <th class="px-4 py-2">Entregar</th>
-                </tr>
-                </thead>
-                <tbody class="bg-white divide-y">
-                <tr v-for="orden in ordenes" :key="orden.id" :class="getZonaClass(orden.zona)">
-                    <td class="px-4 py-2">{{ orden.cliente }}</td>
-                    <td class="px-4 py-2">{{ orden.direccion }}</td>
-                    <td class="px-4 py-2">{{ orden.telefono }}</td>
-                    <td class="px-4 py-2">{{ orden.monto_total.toFixed(2) }} MXN</td>
-                    <td class="px-4 py-2">
-                        <!-- El botón ahora llama correctamente a abrirModal con el ID de la orden -->
-                        <button @click="abrirModal(orden.id)" class="bg-green-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-2">
-                            {{ orden.repartidor || 'Sin repartidor' }}
-                        </button>
-                    </td>
-                    <td class="px-4 py-2">{{ orden.zona }}</td>
-                    <td class="px-4 py-2">
-                        <button @click="verDetalle(orden.id)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                                <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-                                <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="table-auto w-full whitespace-no-wrap bg-white divide-y divide-gray-200">
+                    <thead>
+                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-700 uppercase bg-gray-200">
+                        <th class="px-4 py-2">Cliente</th>
+                        <th class="px-4 py-2">Dirección</th>
+                        <th class="px-4 py-2">Teléfono</th>
+                        <th class="px-4 py-2">Monto Total</th>
+                        <th class="px-4 py-2">Repartidor</th>
+                        <th class="px-4 py-2">Zona</th>
+                        <th class="px-4 py-2">Ver</th>
+                        <th class="px-4 py-2">Entregar</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="orden in ordenes" :key="orden.id" :class="getZonaClass(orden.zona)">
+                        <td class="px-4 py-2">{{ orden.cliente }}</td>
+                        <td class="px-4 py-2">{{ orden.direccion }}</td>
+                        <td class="px-4 py-2">{{ orden.telefono }}</td>
+                        <td class="px-4 py-2">{{ orden.monto_total.toFixed(2) }} MXN</td>
+                        <td class="px-4 py-2">
+                            <button @click="abrirModal(orden.id)" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                {{ orden.repartidor || 'Sin repartidor' }}
+                            </button>
+                        </td>
+                        <td class="px-4 py-2">{{ orden.zona }}</td>
+                        <td class="px-4 py-2">
+                            <button @click="verDetalle(orden.id)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                                    <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                    <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </td>
+                        <td class="px-4 py-2">
+                            <button @click="entregar(orden.id)" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                                Entregar
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <!-- Modal -->
             <div v-if="modalVisible" class="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h1 class="m-5 text-gray-600 pr-5">Cambiar repartidor</h1>
-                    <table class="table-auto mt-5">
+                <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+                    <h1 class="text-gray-600 mb-4">Cambiar repartidor</h1>
+                    <table class="table-auto w-full">
                         <tbody>
                         <tr v-for="usuario in usuarios" :key="usuario.id">
                             <td class="px-4 py-2">
-                                <!-- Convertimos el nombre en un botón -->
-                                <button @click="seleccionarRepartidor(usuario.id)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                <button @click="seleccionarRepartidor(usuario.id)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full text-left">
                                     {{ usuario.name }}
                                 </button>
                             </td>
@@ -131,5 +136,13 @@ const getZonaClass = (zona) => {
         VERDE: 'bg-green-500 text-white',
     };
     return colorClasses[zona] || 'bg-white';
+}
+
+const entregar = (ordenId) => {
+    Inertia.put(`/ordenes/entregar/${ordenId}`).then(() => {
+        cerrarModal();
+    }).catch((error) => {
+        console.error('Error al entregar la orden:', error);
+    });
 }
 </script>
